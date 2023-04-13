@@ -1,0 +1,26 @@
+# This is the main config for feature extraction.
+model:
+  batch_size: 32
+  epochs: 20
+  learning_rate: 0.0001
+  optimizer: Adam #sgd #falta que implemente este argumento
+  mode: 'classification' #'feature_extraction' 'classification'
+  loss_function: categorical_crossentropy # "categorical_crossentropy", "focal_loss"
+  metrics_patch_level: True
+  #metrics_for_model_saving: val_accuracy
+  load_model: None # 'None' or path to experiment folder which contains 'models' directory with .h5 files
+  save_model: True # True or False
+
+data:
+  dataset_dir: "/data/Prostata/Images/Feature_Extraction/Images/maj4_aggregation"
+  output_dir: "/data/Prostata/Images/Feature_Extraction/DS_maj4_construction"
+  image_size: 2048
+  final_size: 512
+  dataset_split: False
+  aggregation: maj_4 #falta que implemente este argumento
+
+
+logging:
+  log_artifacts: True
+  run_name: feature_extraction_annotated_maj4
+  tracking_url: /work/work_alba/mlflow_server
