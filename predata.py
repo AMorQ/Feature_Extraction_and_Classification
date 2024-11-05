@@ -7,28 +7,25 @@ import numpy as np
 import shutil
 
 """
-this script is for reading a data table with patches and labels assigned to them in order to train
-a CNN for feature extraction (these images are the ones that are annotated by all residents)
+This script is intended to serve the purpose of transforming raw data into something that can be fed 
+to an algorithm to be able to extract features
+Reads patches and labels (from validation and dense training set, recall that these images are annotated by all markers of the 
+crowdsourced dataset) to train a CNN for feature extraction (these images are the ones that are annotated by all residents)
+and ultimately, classificate the image
 """
 
-#todo: IMPROVEMENTS: include a config.yaml, include an environment.yaml
 
 
-#todo: first thing I should do is curated it manually
-
-def data_curation(args): #todo: por qué tarda tanto en cargarme el .xls?
+def data_curation(args): #translate tables of annotations into objects in python. Move desired images/files to folders
     """
     We extract annotations for validation and dense set
-
     """
+
     dict_markers_val = pd.read_excel(os.path.join(args.data_dir, 'Data_patches.xls'),
                                    sheet_name=['marker1', 'marker2', 'marker3', 'marker4', 'marker5', 'marker6', 'marker7'])
     dict_markers_dense = pd.read_excel(os.path.join(args.data_dir, 'Data_patches_DT.xls'),
                                      sheet_name=['marker1', 'marker2', 'marker3', 'marker4', 'marker5', 'marker6', 'marker7'])
 
-    #move dense patches to a folder, wont do it for validation as it is already done
-    #moving_patches = dict_markers_dense.get('marker1')['Patch filename'].str.split(pat='DT_', expand=True)[1].str.split(pat='.', expand=True)[0].tolist()
-    #premove_patches(moving_patches)
 
     df_markers_val, val_df = data_creation(dict_markers_val, 'val')
     df_markers_dense, dense_df = data_creation(dict_markers_dense, 'dense')
@@ -40,13 +37,13 @@ def data_curation(args): #todo: por qué tarda tanto en cargarme el .xls?
 
     #move patches to correct folder structure for later working with data generators
     move_patches(args, gt_df_val, maj_df_val, 'val' )
-    #todo: se me han movido muy pocos parches. REVISAR. de todas formas, puede ser por la agregación, porque solo he considerado parches con un consenso de 3 o más
-    #todo: coinciden más en los grados 4 y 5, que 0 y 3
     move_patches(args, gt_df_dense, maj_df_dense, 'dense' )
 
 def data_creation(data_df, partition):
+
     ddf = {}
     markers_df = pd.DataFrame()
+
     for i in range(len(data_df)):
         i += 1
         marker = 'marker{s}'.format(s=str(i))
@@ -55,42 +52,43 @@ def data_creation(data_df, partition):
         markers = [marker] * len(marker_df)
         marker_df.loc[:, 'markers'] = markers
         markers_df = pd.concat([markers_df, marker_df])
-        ddf['marker{s}'.format(s=str(i))] = marker_df
+        ddf['marker{s}'.format(s=str(i))] = marker_df #DICTIONARY OF DATAFRAMES
+
     label = ['Grade 3+3', 'Grade 3+4', 'Grade 3+5', 'Grade 4+3', 'Grade 4+4', 'Grade 4+5', 'Grade 5+3', 'Grade 5+4',
              'Grade 5+5', 'Grade 5', 'Grade 4', 'Grade 3', 'Bening (healthy)']
     eti = ['Grado 3+3', 'Grado 3+4', 'Grado 3+5', 'Grado 4+3', 'Grado 4+4', 'Grado 4+5', 'Grado 5+3', 'Grado 5+4',
            'Grado 5+5', 'Grado 5', 'Grado 4', 'Grado 3', 'Bening (saludable)']
     labels = eti + label
-    markers_df = markers_df[markers_df['Annotation 1'].isin(labels)]
-    markers_df_maj = markers_df.drop(['Index', 'Image #'], axis=1).reset_index(drop=True)
+
+    #we extract only the images which labels correspond to a gleason score
+    # this is a dataframe of all the patches annotated by all markers in 'Annotation1' column --> we are ignoring
+    # the secondary annotations
+    markers_df = markers_df[markers_df['Annotation 1'].isin(labels)] #for keeping track
+    markers_df_maj = markers_df.drop(['Index', 'Image #'], axis=1).reset_index(drop=True) #for working
 
 
     values = markers_df['Patch filename'].value_counts()
-    #only extracting patches not annotated by 3 or more residents as Other
+    #only extracting patches not annotated by 4 or more residents as Other ???????
     names = values[values.values >= 4].index.tolist()
 
     markers_fin = pd.DataFrame()
     for k in range(len(names)):
         name = names[k]
         markers_df_fin = markers_df[markers_df['Patch filename'].isin([name])]
-        #todo: seguro que estoy conservando bien el order? al final, tengo names con solo tres anotadores??????
+
         anotaciones = markers_df_fin['Annotation 1'].tolist()
         anotadores = markers_df_fin['markers'].tolist()
 
-        #todo: en algún punto se me cabrea, porque estoy haciendo una copia del df
         markers_df_fin = markers_df_fin.drop(['Index', 'Image #'], axis=1).reset_index(drop=True)
         markers_df_fin = markers_df_fin.transpose()
         #col = markers_df_fin.columns
 
         markers_df_fin.rename(columns={0: 'marker1', 1: 'marker2', 2: 'marker3', 3: 'marker4', 4: 'marker5', 5: 'marker6', 6: 'marker7'}, inplace=True)
-        #viene mal de aquí
         markers_df_fin = markers_df_fin.reset_index(drop=True)
         #markers_df_fin = markers_df_fin.drop([0, 1, 2, 4], axis=0, inplace=True)
         #markers_df_fin_row = pd.DataFrame(list(zip(patches, anotaciones, anotadores)), columns=['Patch name', 'Labels', 'Markers'])
 
         markers_df_fin = markers_df_fin.drop([0, 2], axis=0).reset_index(drop=True)
-        #markers_df_fin.drop([0, 1, 2, 4], axis=0, inplace=True).reset_index(drop=True)
-        #cuando le pongo el inplace=True me lo lleva a NonType
         markers_df_fin['Patch filename'] = name
         markers_fin = pd.concat([markers_df_fin, markers_fin])
         markers_fin = markers_fin.reset_index(drop=True)
@@ -103,25 +101,22 @@ def data_creation(data_df, partition):
         markers_df_maj['Patch filename'] = markers_df_maj['Patch filename'].str.split(pat='DT_', expand=True)[1]
     markers_fin['Patch filename'] = markers_fin['Patch filename'].str.split(pat='.', expand=True)[0]
     markers_df_maj['Patch filename'] = markers_df_maj['Patch filename'].str.split(pat='.', expand=True)[0]
-    #todo:por qué algunos me dan nan? porque hay algunos parches que está Por qué Patch filename se me pone en el medio
-    #todo POR EL MOMENTO VOY A QUITARME LAS FILAS CON NAN PERO TENGO QUE VER QUÉ ESTÁ PASANDO: puede que sean las copias en el dataframe
     markers_fin = markers_fin.dropna(axis=0).reset_index(drop=True)
 
 
     #adding ground truth (validation and dense training sets)
-    #i will later construct the folder structures for the no dense training sets for classifying them with SVGPCR but eill not use them to fine_tune the feature extractor
-    labels_ann = pd.read_csv('/data/Prostata/Images/Training/partition_patches_drop.csv')
+    #no dense training set not used for feature extraction (to validate that model) = greater uncertainty
+    labels_ann = pd.read_csv('...csv')
     nomes = markers_fin['Patch filename'].tolist()
     markers_fin_df = pd.DataFrame()
-    for nom in range(len(nomes)):
 
+    for nom in range(len(nomes)):
         label = labels_ann[labels_ann['image_name'].isin([nomes[nom]])]['label']
         if label.shape[0] == 0:
             label = '0'
         else:
             label = label.values[0]
-        #habrá parches sanos que no estén acá porque metí no filtrados, esta partición la hice después.
-        #LOS VOY A PONER A 0, PERO TENGO QUE COMPROBARLO
+
         markers_fin_row = markers_fin[markers_fin['Patch filename'].isin([nomes[nom]])]
         markers_fin_row['ground truth'] = label
         #todo:asigna esto correctamente
@@ -162,8 +157,7 @@ def majority_voting(args, norm_gt_df, norm_df):
             norm_gt_df_row['label_agg'] = label
         elif args.criteria == 'g_t':
             break
-        else: #todo: si lo saco por ground truth, no calculo label_aggregation
-            #cuidado, ponle un continue
+        else:
             continue
         maj_df = pd.concat([maj_df, norm_gt_df_row])
 
@@ -172,28 +166,9 @@ def majority_voting(args, norm_gt_df, norm_df):
     list_comp = [correct, incorrect]
 
     return gt_df, maj_df, list_comp
-#devuelve un df con el nomrbe del parche y la gt, un dataframe con la etiqueta de agregación y la lista de etiquetas agregadas que coinciden y no con la groud truth establecida por los expertos
+    #return a dataframe with name of patch and ground truth, dataframe with aggregated label and the list of aggregated
+    # labels that matchs and doesn´t match the ground truth or gold label by experts
 
-def premove_patches(moving_patches):
-    #todo:se han movido todos los elementos, los parches sanos son no filtrados también!!
-    pat_dir = '/data/Prostata/Images/Images/Pathological/Patches'
-    hea_dir = '/data/Prostata/Images/Images/Healthy/Patches'
-    dense_dir = '/data/Prostata/Images/Training/Dense'
-    os.makedirs(dense_dir, exist_ok=True)
-    moving_wsi = [moving_patches[i].split('_')[0] + '_' + moving_patches[i].split('_')[1] + '_' + moving_patches[i].split('_')[2]  for i in range(len(moving_patches))]
-    p = 0
-    h = 0
-    for patch in range(len(moving_patches)):
-        if os.path.isfile(os.path.join(pat_dir, moving_wsi[patch] + '.tiff', moving_patches[patch] + '.jpg')):
-            shutil.copy(os.path.join(pat_dir, moving_wsi[patch] + '.tiff', moving_patches[patch] + '.jpg'), os.path.join(dense_dir, moving_patches[patch] + '.jpg'))
-            p += 1
-        if os.path.isfile(os.path.join(hea_dir, moving_wsi[patch] + '.tiff', moving_patches[patch] + '.jpg')):
-            shutil.copy(os.path.join(hea_dir, moving_wsi[patch] + '.tiff', moving_patches[patch] + '.jpg'), os.path.join(dense_dir, moving_patches[patch]+ '.jpg'))
-            h += 1
-    #this is for moving to a folder the patches for dense training.
-    #look in the Pathological/Healthy Patches and move to /Training/Dense
-    print('Number of pathological patches in the dense set-------------------->', p)
-    print('Number of healthy patches in the dense set-------------------->', h)
 
 def move_patches(args, data_gt, data_agg, partition):
     dir_out = '/data/Prostata/Images/Feature_Extraction/Images'
@@ -242,7 +217,6 @@ def move_patches(args, data_gt, data_agg, partition):
 
 
 
-
 def some_args():
     parser = argparse.ArgumentParser(description='Specify parameters to curate and create the folder structure of the database')
     parser.add_argument('--data_dir', '-dd', type=str, default='/data/microdraw/extractDataFromDatabase')
@@ -255,6 +229,3 @@ def main_predata():
     print(args)
     data_curation(args)
 
-#puedo hacerlo así si pretendo llamarlo desde el main verdadero? yo creo que no
-#if __name__ == '__main__':
-#    main()
