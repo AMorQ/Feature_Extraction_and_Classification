@@ -1,3 +1,4 @@
+#IMPORT LIBRARIES
 import os
 import argparse
 import yaml
@@ -24,24 +25,20 @@ def some_args():
 
     print('Load configuration')
     parser.add_argument("--default_config", "-dc", type=str,
-                        default="/data/Prostata/Images/Methods/Feature_Extraction/config.yaml",
+                        default="config.yaml",
                         help="Config path (yaml file expected) to default config.")
 
     return parser.parse_args()
 
 def main(config):
 
-    visualize_images(config)
+    visualize_images(config) # some visualization for assessing the type of image
 
     if config['data']['dataset_split'] == True:
         main_predata()
-        #todo: modular esto
 
-    data_feature_gen = DataGenerator(config)
-    #todo: si no le haces fine tune a la red para qué haces este split??
+    data_feature_gen = DataGenerator(config) #DataGenerator object. Returns images, labels and features
 
-    #np.save(os.path.join(self.data_config['output_dir'], 'features_fine_train.npy'),data_feature_gen.features_fine_train)
-    #print('\nData summary:\n', data_feature_gen.features_fine_train)
 
     features_fine_train = data_feature_gen.features_fine_train
     features_fine_test = data_feature_gen.features_fine_test
@@ -50,15 +47,14 @@ def main(config):
 
     model_svgp, Y_pred, dicto = model_conv_classificationSVGP(features_fine_train, labels_train, 50, features_fine_test,
                                                        labels_test)
-    #todo: Y_pred debería sacarla del modelo
 
-    #MLFLOW
+#MLFLOW
 
     logger = MLFlowLogger(config)
     logger.mlflow_logging()
     #logger.data_logging(ds_train.get_train_data_statistics())
 
-    #todo: reformat dicto to correctly log to mlflow (should be done in metrics)
+    #todo: THIS SHOULD BE DONE IN METRICS
 
     values = {}
     for key, value in dicto.items():
@@ -77,9 +73,11 @@ def main(config):
 
 
 if __name__ == '__main__':
+
     args = some_args()
     print('Arguments:')
     print(args)
+
     config = load_configs(args)
     os.makedirs(config['data']['output_dir'], exist_ok=True)
     main(config)
