@@ -97,10 +97,10 @@ def model_conv_classificationSVGP(Xtrain, Ytrain, num_ind:int, Xtest, Ytest):
 
     Ytrain = (Ytrain.reshape(-1, 1)).astype('float64')
     Xtrain = (Xtrain.reshape(-1, 512)).astype('float64')
-    #hago una repartición, por ver cómo hacerla como una librería diferente y para reducir el número de imágenes
+
 
     #X_train_sub, X_valid, Y_train_sub, Y_valid = train_test_split(Xtrain, Ytrain, test_size=0.2, random_state=42)
-    #todo:tengo que hacer algo para pasar de las variables de tensorflow a gpflow. modula todo esto
+ 
 
     invlink = gpflow.likelihoods.RobustMax(4)
     model_svgp = gpflow.models.SVGP(gpflow.kernels.SquaredExponential(),
@@ -112,7 +112,7 @@ def model_conv_classificationSVGP(Xtrain, Ytrain, num_ind:int, Xtest, Ytest):
     #first we put the inducing points fixed
     gpflow.set_trainable(model_svgp.inducing_variable, False)
 
-    #hace falta?
+   
     #minibatch_size = 50 if Xtrain.shape[0] > 50 else None
     #model_svgp.X.set_batch_size(minibatch_size)
     #model_svgp.Y.set_batch_size(minibatch_size)
