@@ -46,7 +46,7 @@ class DataGenerator:
         #normalize
         ds_train = dataset_train.map(normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         ds_test = dataset_val.map(normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        #TODO: CANNOT i CALL A FUNCTION DEFINED IN AN OBJECT FROM INSIDE AN OBJECT OR IT WAS THE ORDER?
+        #TODO:
 
         ds_train = ds_train.cache()
         ds_train = ds_train.prefetch(tf.data.experimental.AUTOTUNE)
@@ -60,7 +60,7 @@ class DataGenerator:
             #todo: THIS SHOULD BE DONE IN THE MODEL FILE --> PUT ADAP OPTIMIZER LIKE A PARAMETER TO THE FUNCTION
 
             optim = Adam(learning_rate=self.model_config['learning_rate'])
-            #if learning_rete is increased, I have a huge loss
+
 
 
             print("Load classification model")
@@ -70,7 +70,7 @@ class DataGenerator:
             #TRAIN MODEL, TODO: epochs?
             model_fine.fit(ds_train, epochs=self.model_config['epochs'])
             classification_fine = model_fine.evaluate(ds_test, return_dict=True)
-            #should I stop the proccedure if the results are not that good?
+
 
 #todo: this should be done in MLFLOW file
             logger = MLFlowLogger(self.config)
