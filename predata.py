@@ -119,7 +119,7 @@ def data_creation(data_df, partition):
 
         markers_fin_row = markers_fin[markers_fin['Patch filename'].isin([nomes[nom]])]
         markers_fin_row['ground truth'] = label
-        #todo:asigna esto correctamente
+        #todo
         markers_fin_df = pd.concat([markers_fin_df, markers_fin_row])
 
     # normalize labels
@@ -135,8 +135,7 @@ def data_creation(data_df, partition):
     markers_df_maj_norm = markers_df_maj.replace(list_lab_3, '3').replace(list_lab_4, '4').replace(list_lab_5, '5').replace(
         list_lab_0, '0')
     return markers_fin_norm, markers_df_maj_norm
-    #devuelve un df con 3 columnas (nombre, marcador, anotación del marker)
-    #y un df con 9 columnas (nombre 7 markers y gt) (al revés) POR QUÉ SE ME PONE PATCH FILENAME EN MEDIO?
+
 
 def majority_voting(args, norm_gt_df, norm_df):
 
@@ -147,7 +146,7 @@ def majority_voting(args, norm_gt_df, norm_df):
     for patch in range(len(norm_df_list)):
         labels = norm_df[norm_df['Patch filename'].isin([norm_df_list[patch]])]['Annotation 1']
         label = np.max(labels)
-        #cuenta el número máxio de ocurrencias??SI, LABELS ES UNA SERIE
+
         num_ann = (labels == label).value_counts()
         if args.criteria == 'maj_3' and num_ann[True] >= 3:
             norm_gt_df_row = norm_gt_df[norm_gt_df['Patch filename'].isin([norm_df_list[patch]])]
