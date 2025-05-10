@@ -18,14 +18,6 @@ from gpflow.utilities import print_summary
 #from scipy.cluster.vq import kmeans
 #from data import normalize_it
 #import IPython
-#todo: convertir el modelo en una clase
-
-
-"""
-2023-02-13 16:25:47.060265: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1934] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
-Skipping registering GPU devices...
-"""
-
 
 def create_model(input_shape, n_classes: int, optimizer='rmsprop', fine_tune: int = 0):
     """
