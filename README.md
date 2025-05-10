@@ -46,15 +46,15 @@ Prostate cancer image analysis is a key area in medical imaging research. This r
    python model_conv.py --data <path_to_preprocessed_data> --output <path_to_results>
 3. (Future Work) For SVGPCR implementation, stay tuned for updates in this repository.
 
-4. **CONTENTS** (IN ORDER OF UTILIZATION): 
-- main.py: call all functions
-- predata.py: create correct folder structure for keras data generator 
-- data.py: create data generators and call feature extraction models 
-- data_utils.py: helper functions of data.py
-- model_conv.py: feature extraction and classification models 
-- SVGP_utils.py: helper functions of SVGP classification
-- metrics.py: calculate metrics 
-- mlflow_logging: log parameters and metrics to MLFLOW
+4. *CONTENTS* (IN ORDER OF UTILIZATION): 
+   - main.py: call all functions
+   - predata.py: create correct folder structure for keras data generator 
+   - data.py: create data generators and call feature extraction models 
+   - data_utils.py: helper functions of data.py
+   - model_conv.py: feature extraction and classification models 
+   - SVGP_utils.py: helper functions of SVGP classification
+   - metrics.py: calculate metrics 
+   - mlflow_logging: log parameters and metrics to MLFLOW
    
 ## Contributing
 Contributions are welcome! To contribute:
