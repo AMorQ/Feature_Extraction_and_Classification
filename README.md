@@ -24,7 +24,7 @@ Prostate cancer image analysis is a key area in medical imaging research. This r
         This is the implementation of the code of the paper 
         *A. Schmidt, J. Silva-Rodríguez, R. Molina and V. Naranjo, "Efficient Cancer Classification by Coupling Semi Supervised and Multiple Instance Learning," in IEEE      Access, vol. 10, pp. 9763-9773, 2022, doi: 10.1109/ACCESS.2022.3143345.*
 - **Classification**: Classify images using Sparse Variational Gaussian Processes (SVGP).
-- **Future Work**: Implementation of SVGP Classification Regression (SVGPCR) for enhanced performance.
+- **Future Work**: Implementation of SVGP Classification for Crowdsourcing (SVGPCR) for enhanced performance, taking advantage to the biggest crowdsourcing dataset for prostate cancer computer vision classification: https://www.sciencedirect.com/science/article/pii/S0169260724004656?via%3Dihub.
 
 ## Installation
 1. Clone this repository:
@@ -37,15 +37,7 @@ Prostate cancer image analysis is a key area in medical imaging research. This r
    ```bash
    pip install -r requirements.txt
 ## Usage
-1. To preprocess images, use the `preprocess.py` script:
-   ```bash
-   python preprocess.py --input_dir <path_to_images> --output_dir <path_to_output>
-2. Run the feature extraction and classification using the `model_conv.py` script:
-   ```bash
-   python model_conv.py --data <path_to_preprocessed_data> --output <path_to_results>
-3. (Future Work) For SVGPCR implementation, stay tuned for updates in this repository.
-
-4. *CONTENTS* (IN ORDER OF UTILIZATION): 
+(IN ORDER OF UTILIZATION): 
    - main.py: call all functions
    - predata.py: create correct folder structure for keras data generator 
    - data.py: create data generators and call feature extraction models 
