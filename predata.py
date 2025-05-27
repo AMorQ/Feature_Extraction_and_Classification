@@ -7,7 +7,7 @@ import numpy as np
 import shutil
 
 """
-This script is intended to serve the purpose of transforming raw data into something that can be fed 
+This script is intended to serve the purpose of transforming raw data (extracted from an SQL database fed by an annotation web API) into something that can be fed 
 to an algorithm to be able to extract features
 Reads patches and labels (from validation and dense training set, recall that these images are annotated by all markers of the 
 crowdsourced dataset) to train a CNN for feature extraction (these images are the ones that are annotated by all residents)
